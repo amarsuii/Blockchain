@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Verification Result - {{ cert_id if cert_id else certificate.certificate_id }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="max-w-800 mx-auto">
+        {% if status == 'VERIFIED' %}
+        <!-- SUCCESS CARD -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white mb-4">
+            <div class="card-header bg-success text-white py-4 text-center">
+                <div class="badge-icon bg-white text-success mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                    <i class="bi bi-patch-check-fill fs-1"></i>
+                </div>
+                <h3 class="fw-bold mb-0">✓ CERTIFICATE VERIFIED</h3>
+                <p class="text-white-50 mb-0 font-monospace">Cryptographically Validated on Ethereum Blockchain</p>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <div class="alert alert-success bg-success-subtle border-success text-success-emphasis rounded-3 mb-4 d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-check fs-4"></i>
+                    <div>
+                        <strong>Authentic Record:</strong> The SHA-256 digest of this certificate matches the immutable hash stored on the smart contract.
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <div class="text-muted small text-uppercase">Certificate ID</div>
+                        <div class="fw-bold fs-5 font-monospace text-primary">{{ certificate.certificate_id }}</div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="text-muted small text-uppercase">Student Name</div>
+                        <div class="fw-bold fs-5 text-dark">{{ certificate.student.name if certificate.student else certificate.student_id }}</div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="text-muted small text-uppercase">Course Name</div>
+                        <div class="fw-semibold text-dark">{{ certificate.course_name }}</div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="text-muted small text-uppercase">Issuer Organization</div>
+                        <div class="fw-semibold text-dark">{{ certificate.issuer }}</div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="text-muted small text-uppercase">Completion Date</div>
+                        <div class="text-dark font-monospace">{{ certificate.completion_date }}</div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="text-muted small text-uppercase">Blockchain Status</div>
+                        <div><span class="badge bg-success font-monospace px-3 py-1"><i class="bi bi-link-45deg me-1"></i> Verified (Confirmed)</span></div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-cpu text-primary me-1"></i> Cryptographic Audit Trail</h6>
+
+                <div class="mb-3">
+                    <div class="text-muted small font-monospace">Canonical String Input:</div>
+                    <div class="p-2 bg-light rounded border font-monospace small text-break text-primary">{{ canonical_str }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="text-muted small font-monospace">Calculated SHA-256 Hash:</div>
+                    <div class="p-2 bg-light rounded border font-monospace small text-break text-success fw-bold">{{ recalculated_hash }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="text-muted small font-monospace">On-Chain Smart Contract Hash:</div>
+                    <div class="p-2 bg-light rounded border font-monospace small text-break text-success fw-bold">{{ onchain_hash }}</div>
+                </div>
+
+                {% if certificate.blockchain_tx_hash %}
+                <div>
+                    <div class="text-muted small font-monospace">Blockchain Transaction Hash:</div>
+                    <div class="p-2 bg-dark-indigo text-white rounded font-monospace small text-break">{{ certificate.blockchain_tx_hash }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% elif status == 'FAILED' %}
+        <!-- MISMATCH / TAMPERING DETECTED CARD -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white mb-4">
+            <div class="card-header bg-danger text-white py-4 text-center">
+                <div class="badge-icon bg-white text-danger mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                    <i class="bi bi-x-circle-fill fs-1"></i>
+                </div>
+                <h3 class="fw-bold mb-0">✕ VERIFICATION FAILED</h3>
+                <p class="text-white-50 mb-0 font-monospace">Hash Mismatch / Data Tampering Detected</p>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <div class="alert alert-danger bg-danger-subtle border-danger text-danger-emphasis rounded-3 mb-4">
+                    <h6 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Hash Mismatch Warning</h6>
+                    <p class="mb-0 small">
+                        The certificate information does not match the immutable record stored on the blockchain. 
+                        <strong>Possible reason:</strong> The certificate data may have been modified or tampered with.
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-2 font-monospace">Cryptographic Comparison:</h6>
+                    
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="text-danger small font-monospace fw-bold mb-1"><i class="bi bi-x-circle me-1"></i> Calculated SHA-256 Hash (Current Input):</div>
+                        <div class="font-monospace small text-break text-danger bg-white p-2 border rounded">{{ recalculated_hash }}</div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="text-success small font-monospace fw-bold mb-1"><i class="bi bi-check-circle me-1"></i> Blockchain Immutable Smart Contract Hash:</div>
+                        <div class="font-monospace small text-break text-success bg-white p-2 border rounded">{{ onchain_hash }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- NOT FOUND CARD -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white mb-4">
+            <div class="card-header bg-warning text-dark py-4 text-center">
+                <div class="badge-icon bg-white text-warning mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                    <i class="bi bi-search fs-1"></i>
+                </div>
+                <h3 class="fw-bold mb-0">✕ RECORD NOT FOUND</h3>
+                <p class="text-dark-50 mb-0 font-monospace">Certificate ID Not Registered</p>
+            </div>
+
+            <div class="card-body p-4 p-md-5 text-center">
+                <p class="lead text-secondary mb-4">
+                    No certificate record found for Certificate ID <strong>"{{ cert_id }}"</strong> in the registry database.
+                </p>
+                <div class="alert alert-warning bg-warning-subtle text-dark border-warning rounded-3 small text-start">
+                    <i class="bi bi-info-circle me-1"></i> Please check that the Certificate ID was entered correctly or contact your institution administrator.
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="text-center">
+            <a href="{{ url_for('verification.verify_search') }}" class="btn btn-outline-dark rounded-pill px-4 me-2">
+                <i class="bi bi-arrow-left me-1"></i> Verify Another Certificate
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-primary rounded-pill px-4">
+                <i class="bi bi-house-door me-1"></i> Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Certificate - Public Verification Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="max-w-700 mx-auto">
+        <div class="text-center mb-4">
+            <div class="brand-icon mx-auto mb-3 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                <i class="bi bi-patch-check fs-2"></i>
+            </div>
+            <h2 class="fw-bold text-dark">Certificate Verification Portal</h2>
+            <p class="text-secondary">Verify the authenticity of an online learning certificate using its unique ID or by scanning its QR code.</p>
+        </div>
+
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+            <div class="card-header bg-dark-indigo text-white p-0">
+                <ul class="nav nav-tabs nav-justified border-0" id="verifyTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active py-3 text-white fw-semibold border-0" id="id-tab" data-bs-toggle="tab" data-bs-target="#id-panel" type="button" role="tab">
+                            <i class="bi bi-input-cursor-text me-2"></i> Certificate ID
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link py-3 text-white fw-semibold border-0" id="qr-tab" data-bs-toggle="tab" data-bs-target="#qr-panel" type="button" role="tab">
+                            <i class="bi bi-qr-code-scan me-2"></i> Scan QR Code
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <div class="tab-content" id="verifyTabContent">
+                    <!-- Tab 1: Certificate ID Search -->
+                    <div class="tab-pane fade show active" id="id-panel" role="tabpanel">
+                        <form action="{{ url_for('verification.verify_search') }}" method="POST">
+                            <div class="mb-4">
+                                <label for="certificate_id" class="form-label fw-semibold">Enter Certificate ID</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light"><i class="bi bi-hash"></i></span>
+                                    <input type="text" class="form-control font-monospace" id="certificate_id" name="certificate_id" placeholder="e.g. INF001 or CERT001" required>
+                                </div>
+                                <div class="form-text text-muted">The Certificate ID can be found at the top or bottom of your course document.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3">
+                                <i class="bi bi-shield-check me-2"></i> Verify Authenticity
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab 2: Interactive Camera QR Code Scanner -->
+                    <div class="tab-pane fade text-center" id="qr-panel" role="tabpanel">
+                        <div class="p-3 bg-light rounded-3 mb-3">
+                            <p class="text-muted small mb-2"><i class="bi bi-camera me-1"></i> Point your camera at the certificate QR code or upload an image file.</p>
+                            <div id="qr-reader" class="w-100 rounded-3 overflow-hidden" style="max-width: 400px; margin: 0 auto;"></div>
+                            <div id="qr-reader-results" class="mt-3"></div>
+                        </div>
+
+                        <div class="mt-3">
+                            <input type="file" id="qr-input-file" accept="image/*" class="form-control">
+                            <small class="text-muted">Or upload a saved QR Code image</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- HTML5 QR Code Reader Library -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+
+        function onScanSuccess(decodedText, decodedResult) {
+            html5QrCode.stop().then(() => {
+                window.location.href = decodedText;
+            }).catch(err => {
+                window.location.href = decodedText;
+            });
+        }
+
+        const qrTab = document.getElementById('qr-tab');
+        qrTab.addEventListener('shown.bs.tab', function () {
+            Html5Qrcode.getCameras().then(cameras => {
+                if (cameras && cameras.length) {
+                    const cameraId = cameras[0].id;
+                    html5QrCode.start(
+                        cameraId, 
+                        { fps: 10, qrbox: { width: 250, height: 250 } },
+                        onScanSuccess
+                    ).catch(err => console.log("Camera start error:", err));
+                }
+            }).catch(err => console.log("Camera access error:", err));
+        });
+
+        // Image file scan fallback
+        const fileInput = document.getElementById('qr-input-file');
+        fileInput.addEventListener('change', e => {
+            if (e.target.files.length == 0) return;
+            const imageFile = e.target.files[0];
+            html5QrCode.scanFile(imageFile, true)
+                .then(decodedText => {
+                    window.location.href = decodedText;
+                })
+                .catch(err => {
+                    alert("No valid QR Code found in uploaded image.");
+                });
+        });
+    });
+</script>
+{% endblock %}

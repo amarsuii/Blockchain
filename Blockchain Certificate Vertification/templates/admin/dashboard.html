@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Certificate Verification System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Administrator Dashboard</h2>
+            <p class="text-secondary mb-0">System overview, smart contract statistics, and certificate audit logs.</p>
+        </div>
+        <div class="mt-3 mt-md-0 d-flex gap-2">
+            <a href="{{ url_for('admin.register_certificate') }}" class="btn btn-primary rounded-pill px-3">
+                <i class="bi bi-plus-lg me-1"></i> Register Certificate
+            </a>
+            <a href="{{ url_for('verification.verify_search') }}" class="btn btn-outline-dark rounded-pill px-3">
+                <i class="bi bi-patch-check me-1"></i> Public Verifier
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Metric Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4 col-xl-2.4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-primary">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Certs</div>
+                        <h3 class="fw-bold mb-0 mt-1 text-dark">{{ total_certificates }}</h3>
+                    </div>
+                    <div class="metric-icon bg-primary bg-opacity-10 text-primary rounded-3 p-2 fs-4">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2.4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-success">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Verified On-Chain</div>
+                        <h3 class="fw-bold mb-0 mt-1 text-success">{{ verified_certificates }}</h3>
+                    </div>
+                    <div class="metric-icon bg-success bg-opacity-10 text-success rounded-3 p-2 fs-4">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2.4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-danger">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Failed Checks</div>
+                        <h3 class="fw-bold mb-0 mt-1 text-danger">{{ failed_verifications }}</h3>
+                    </div>
+                    <div class="metric-icon bg-danger bg-opacity-10 text-danger rounded-3 p-2 fs-4">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2.4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Students</div>
+                        <h3 class="fw-bold mb-0 mt-1 text-info">{{ total_students }}</h3>
+                    </div>
+                    <div class="metric-icon bg-info bg-opacity-10 text-info rounded-3 p-2 fs-4">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2.4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-purple">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Verifications</div>
+                        <h3 class="fw-bold mb-0 mt-1 text-purple">{{ total_verifications }}</h3>
+                    </div>
+                    <div class="metric-icon bg-purple bg-opacity-10 text-purple rounded-3 p-2 fs-4">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Analytics Chart -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart-fill text-primary me-2"></i> Verification Audit Distribution</h5>
+                <div class="chart-container position-relative" style="height: 250px;">
+                    <canvas id="verificationStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Certificates -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock text-primary me-2"></i> Recently Registered Certificates</h5>
+                    <a href="{{ url_for('admin.certificates') }}" class="btn btn-sm btn-link text-decoration-none">View All &rarr;</a>
+                </div>
+
+                {% if recent_certificates %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cert ID</th>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cert in recent_certificates %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('admin.certificate_detail', cert_id=cert.certificate_id) }}" class="fw-bold text-decoration-none font-monospace">
+                                        {{ cert.certificate_id }}
+                                    </a>
+                                </td>
+                                <td>{{ cert.student.name if cert.student else cert.student_id }}</td>
+                                <td>{{ cert.course_name }}</td>
+                                <td>
+                                    {% if cert.blockchain_status == 'CONFIRMED' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Confirmed</span>
+                                    {% else %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">Pending</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted my-4 text-center">No certificates registered yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('verificationStatusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['On-Chain Verified', 'Failed / Modified Checks', 'Pending Registration'],
+                datasets: [{
+                    data: [{{ verified_certificates }}, {{ failed_verifications }}, {{ total_certificates - verified_certificates }}],
+                    backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

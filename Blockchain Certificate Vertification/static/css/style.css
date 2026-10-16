@@ -1,0 +1,83 @@
+/* Custom Design System for Blockchain Certificate Verification System */
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --dark-indigo: #0f172a;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #334155;
+    background-color: #f8fafc;
+}
+
+.font-monospace {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+.bg-dark-indigo {
+    background-color: var(--dark-indigo) !important;
+}
+
+.text-primary-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.icon-square {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.max-w-700 { max-width: 700px; }
+.max-w-800 { max-width: 800px; }
+.max-w-900 { max-width: 900px; }
+
+.text-purple { color: #8b5cf6 !important; }
+.bg-purple { background-color: #8b5cf6 !important; }
+.border-purple { border-color: #8b5cf6 !important; }

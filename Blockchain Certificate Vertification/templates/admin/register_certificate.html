@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Register Certificate - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="max-w-900 mx-auto">
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">Register New Certificate</h2>
+                <p class="text-secondary mb-0">Generates SHA-256 hash, registers record on Ethereum smart contract, and produces a QR code.</p>
+            </div>
+            <a href="{{ url_for('admin.certificates') }}" class="btn btn-outline-secondary rounded-pill px-3">
+                &larr; Back to Registry
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+            <div class="card-header bg-dark-indigo text-white p-4">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-plus fs-3 text-primary-gradient"></i>
+                    <div>
+                        <h5 class="fw-bold mb-0">Certificate & On-Chain Metadata</h5>
+                        <small class="text-white-50">All certificate fields will be hashed into canonical SHA-256 format.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <form action="{{ url_for('admin.register_certificate') }}" method="POST" enctype="multipart/form-data" id="registerForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="student_name" class="form-label fw-semibold">Student Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="student_name" name="student_name" value="{{ form_data.student_name if form_data else '' }}" placeholder="e.g. Demo Student" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="student_id" class="form-label fw-semibold">Student ID / USN <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control font-monospace" id="student_id" name="student_id" value="{{ form_data.student_id if form_data else '' }}" placeholder="e.g. STU001" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="student_email" class="form-label fw-semibold">Student Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="student_email" name="student_email" value="{{ form_data.student_email if form_data else '' }}" placeholder="student@certverify.org" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="certificate_id" class="form-label fw-semibold">Certificate ID <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control font-monospace" id="certificate_id" name="certificate_id" value="{{ form_data.certificate_id if form_data else '' }}" placeholder="e.g. CERT001" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="course_name" class="form-label fw-semibold">Course Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="course_name" name="course_name" value="{{ form_data.course_name if form_data else '' }}" placeholder="e.g. Python Programming" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="issuer" class="form-label fw-semibold">Issuer Organization <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="issuer" name="issuer" value="{{ form_data.issuer if form_data else 'Infosys Springboard' }}" placeholder="Infosys Springboard" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="completion_date" class="form-label fw-semibold">Completion Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="completion_date" name="completion_date" value="{{ form_data.completion_date if form_data else '2026-08-10' }}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="certificate_file" class="form-label fw-semibold">Upload Certificate Document (Optional)</label>
+                            <input type="file" class="form-control" id="certificate_file" name="certificate_file" accept=".pdf,.png,.jpg,.jpeg">
+                            <small class="text-muted">Supported: PDF, PNG, JPG, JPEG (Max 16 MB)</small>
+                        </div>
+                    </div>
+
+                    <!-- Hash Preview Container -->
+                    <div class="mt-4 p-3 bg-light rounded-3 border">
+                        <div class="fw-bold text-dark mb-1 small d-flex align-items-center gap-1">
+                            <i class="bi bi-hash text-primary"></i> Canonical String Preview:
+                        </div>
+                        <div class="font-monospace small text-primary text-break mb-2 bg-white p-2 border rounded" id="canonicalPreview">
+                            student_id|certificate_id|course_name|issuer|completion_date
+                        </div>
+                        <div class="text-muted small">
+                            <i class="bi bi-shield-lock me-1"></i> SHA-256 Hash will be written to Ethereum Smart Contract on commit.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4 gap-2">
+                        <a href="{{ url_for('admin.certificates') }}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5">
+                            <i class="bi bi-check-circle me-1"></i> Submit & Register on Blockchain
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const studentId = document.getElementById('student_id');
+        const certId = document.getElementById('certificate_id');
+        const course = document.getElementById('course_name');
+        const issuer = document.getElementById('issuer');
+        const date = document.getElementById('completion_date');
+        const preview = document.getElementById('canonicalPreview');
+
+        function updatePreview() {
+            const s = studentId.value.trim() || 'student_id';
+            const c = certId.value.trim() || 'certificate_id';
+            const crs = course.value.trim() || 'course_name';
+            const iss = issuer.value.trim() || 'issuer';
+            const dt = date.value.trim() || 'completion_date';
+            preview.textContent = `${s}|${c}|${crs}|${iss}|${dt}`;
+        }
+
+        [studentId, certId, course, issuer, date].forEach(el => el.addEventListener('input', updatePreview));
+        updatePreview();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Blockchain Certificate Verification System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5 position-relative overflow-hidden">
+    <div class="container py-4">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 mb-3 font-monospace">
+                    <i class="bi bi-shield-lock-fill me-1"></i> Ethereum Smart Contract Powered
+                </div>
+                <h1 class="display-4 fw-bold mb-3 text-dark">
+                    Blockchain-Based <br>
+                    <span class="text-primary-gradient">Certificate Verification</span>
+                </h1>
+                <p class="lead text-secondary mb-4">
+                    Secure • Transparent • Tamper-Resistant online learning certificate verification system powered by <strong>SHA-256 cryptographic hashing</strong> and <strong>Ethereum Solidity Smart Contracts</strong>.
+                </p>
+
+                <!-- Search Card -->
+                <div class="card border-0 shadow-lg p-2 rounded-4 bg-white mb-4">
+                    <form action="{{ url_for('verification.verify_search') }}" method="POST" class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-lg border-0">
+                            <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="certificate_id" class="form-control border-0 shadow-none ps-0" placeholder="Enter Certificate ID (e.g., CERT001)" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 px-4 text-nowrap">
+                            <i class="bi bi-patch-check-fill me-1"></i> Verify Now
+                        </button>
+                    </form>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <a href="{{ url_for('verification.verify_search') }}" class="btn btn-outline-dark btn-lg rounded-pill px-4">
+                        <i class="bi bi-qr-code-scan me-2"></i> Scan QR Code
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-link text-decoration-none text-secondary">
+                        <i class="bi bi-lock me-1"></i> Administrator Portal &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-xl rounded-4 bg-dark-indigo text-white p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom border-secondary pb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="pulse-dot bg-success"></span>
+                            <span class="fw-semibold text-white">Blockchain Node Active</span>
+                        </div>
+                        <span class="badge bg-secondary font-monospace">Ganache Testnet</span>
+                    </div>
+
+                    <div class="tech-stack-list d-flex flex-column gap-3 font-monospace small">
+                        <div class="p-3 bg-secondary-subtle bg-opacity-10 rounded-3 border border-secondary border-opacity-25">
+                            <div class="text-primary-gradient fw-bold mb-1"><i class="bi bi-hash me-1"></i> Cryptography</div>
+                            <div class="text-white-50">SHA-256 Canonical Hash Algorithm</div>
+                        </div>
+
+                        <div class="p-3 bg-secondary-subtle bg-opacity-10 rounded-3 border border-secondary border-opacity-25">
+                            <div class="text-primary-gradient fw-bold mb-1"><i class="bi bi-cpu me-1"></i> Smart Contract</div>
+                            <div class="text-white-50">CertificateVerification.sol (Solidity ^0.8.0)</div>
+                        </div>
+
+                        <div class="p-3 bg-secondary-subtle bg-opacity-10 rounded-3 border border-secondary border-opacity-25">
+                            <div class="text-primary-gradient fw-bold mb-1"><i class="bi bi-database me-1"></i> Off-Chain Database</div>
+                            <div class="text-white-50">MySQL + SQLAlchemy ORM</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- System Architecture Section -->
+<section class="py-5 bg-white border-top border-bottom">
+    <div class="container py-3">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <h2 class="fw-bold text-dark mb-2">How It Works</h2>
+            <p class="text-secondary">Two-tier tamper proof verification combining MySQL off-chain data and Ethereum on-chain immutability.</p>
+        </div>
+
+        <div class="row g-4 text-center">
+            <div class="col-md-3">
+                <div class="card h-100 border-0 bg-light p-4 rounded-4 shadow-sm hover-lift">
+                    <div class="icon-square bg-primary text-white mx-auto mb-3 rounded-circle">
+                        <i class="bi bi-file-earmark-text fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold">1. Canonical Format</h5>
+                    <p class="text-muted small mb-0">Certificate fields are joined into a deterministic string (USN|ID|Course|Issuer|Date).</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card h-100 border-0 bg-light p-4 rounded-4 shadow-sm hover-lift">
+                    <div class="icon-square bg-info text-white mx-auto mb-3 rounded-circle">
+                        <i class="bi bi-key fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold">2. SHA-256 Hashing</h5>
+                    <p class="text-muted small mb-0">A 256-bit cryptographic digest is generated. Any 1-bit data change alters this hash completely.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card h-100 border-0 bg-light p-4 rounded-4 shadow-sm hover-lift">
+                    <div class="icon-square bg-warning text-dark mx-auto mb-3 rounded-circle">
+                        <i class="bi bi-boxes fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold">3. Blockchain Commit</h5>
+                    <p class="text-muted small mb-0">The hash & certificate ID are stored permanently on Ethereum via Solidity Smart Contract.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card h-100 border-0 bg-light p-4 rounded-4 shadow-sm hover-lift">
+                    <div class="icon-square bg-success text-white mx-auto mb-3 rounded-circle">
+                        <i class="bi bi-shield-check fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold">4. Instant Verification</h5>
+                    <p class="text-muted small mb-0">Verifiers compare newly calculated SHA-256 hash with immutable on-chain hash record.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

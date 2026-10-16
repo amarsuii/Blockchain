@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Verification History Logs - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Verification History Logs</h2>
+            <p class="text-secondary mb-0">Audit logs of all public and admin verification checks.</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <div class="card-header bg-light py-3 border-bottom d-flex align-items-center justify-content-between">
+            <h6 class="fw-bold mb-0 text-dark">Audit Trail ({{ verifications | length }})</h6>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark-subtle font-monospace small text-uppercase">
+                    <tr>
+                        <th>Log ID</th>
+                        <th>Certificate ID</th>
+                        <th>Verification Time</th>
+                        <th>Result Status</th>
+                        <th>Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if verifications %}
+                    {% for v in verifications %}
+                    <tr>
+                        <td class="font-monospace text-muted">#{{ v.id }}</td>
+                        <td>
+                            <a href="{{ url_for('verification.verify_result', cert_id=v.certificate_id) }}" class="fw-bold font-monospace text-decoration-none">
+                                {{ v.certificate_id }}
+                            </a>
+                        </td>
+                        <td class="text-muted small font-monospace">{{ v.verification_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            {% if v.result == 'VERIFIED' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+                                <i class="bi bi-check-circle me-1"></i> VERIFIED
+                            </span>
+                            {% elif v.result == 'FAILED' %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">
+                                <i class="bi bi-x-circle me-1"></i> FAILED (Mismatch)
+                            </span>
+                            {% else %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1">
+                                <i class="bi bi-search me-1"></i> NOT FOUND
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge text-bg-light border font-monospace">
+                                {{ v.verification_method }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-clock-history fs-1 d-block mb-2 text-secondary"></i>
+                            No verification history logged yet.
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
